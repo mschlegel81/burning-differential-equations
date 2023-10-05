@@ -1,0 +1,604 @@
+printPattern(i:Int)->
+  "%3d: %s %s %s\n     %s # %s\n     %s %s %s".printf@
+  (i|vectorIfThenElse((2^[0..7] and i)>0,'#',' '));
+
+decodePattern(i:Int)->begin
+  local P:=(2^[0..7] and i)>0;
+  P.head(4)|true|P.tail(4);
+end;
+
+encodePattern(B:BooleanList(9))->(2^[0..7]*ord(B.head(4)|B.trailing(4))).agg(+);
+
+MIRROR:=[2,1,0,
+         5,4,3,
+         8,7,6];
+ROT_90:=[6,3,0,
+         7,4,1,
+         8,5,2];
+ROT_180:=ROT_90[ROT_90];
+ROT_270:=ROT_180[ROT_90];
+
+ALL_SYMMETRIES:=[ROT_90,ROT_180,ROT_270,MIRROR,ROT_90[MIRROR],ROT_180[MIRROR],ROT_270[MIRROR]];
+
+sym_of(i:Int)->begin
+  local pat:=i.decodePattern;
+  local seen:=[i].toSet;
+  ALL_SYMMETRIES
+    .map((sym)->encodePattern(pat[sym])=>sym)
+    .each(r,r[0] in seen ? void : begin
+              seen|=r[0];
+              r;
+            end);
+end;
+
+SYMMETRIC_PATTERN:=begin
+  local M:=[].toMap;
+  local seen:=[].toSet;
+  [0..255].each(i,i in seen ? void : begin
+    seen|=i;
+    sym_of(i).each(r,begin
+      seen|=r[0];
+      M[r[0]]:=M[r[0]] orElse [i,r[1]];
+    end);
+  end);
+  M;
+end;
+
+
+//PATTERN_EXTENSIONS:=[
+//255 =>'# # #'&  // # # #
+//     ' # # #'&  // # # #
+//     ' # # #',  // # # #
+// 31 =>'# # #'&  // # # #
+//     ' # # #'&  // # # #
+//     ' # # #',  //
+// 47 =>'# # #'&  // # # #
+//     ' # # +'&  // # #
+//     ' # + +',  // #
+//127 =>'# # #'&  // # # #
+//     ' # # #'&  // # # #
+//     ' # # #',  // # #
+// 46 =>'# # #'&  //   # #
+//     ' # # #'&  // # #
+//     ' # #  ',  // #
+// 36 =>'  + #'&  //     #
+//     ' + # +'&  //   #
+//     ' # +  ',  // #
+//175 =>'# # #'&  // # # #
+//     ' # # #'&  // # #
+//     ' # # +',  // #   #
+// 15 =>'# # #'&  // # # #
+//     ' # # #'&  // # #
+//     ' #    ',  //
+// 63 =>'# # #'&  // # # #
+//     ' # # #'&  // # # #
+//     ' # # #',  // #
+//
+// 62 =>'# # #'&  //   # #
+//     ' # # #'&  // # # #
+//     ' # # #',  // #
+//
+//  7 =>'# # #'&  // # # #
+//     ' # # #'&  //   #
+//     '   #  ',  //
+// 93 =>'# # #'&  // #   #
+//     ' # # #'&  // # # #
+//     ' # # #',  //   #
+// 95 =>'# # #'&  // # # #
+//     ' # # #'&  // # # #
+//     ' # # #',  //   #
+//191 =>'# # #'&  // # # #
+//     ' # # #'&  // # # #
+//     ' # # #',  // #   #
+//  5 =>'# + #'&  // #   #
+//     ' + # +'&  //   #
+//     '   +  ',  //
+//167 =>'# # #'&  // # # #
+//     ' # # #'&  //   #
+//     ' + # +',  // #   #
+// 11 =>'# # #'&  // # #
+//     ' # # #'&  // # #
+//     ' # # +',  //
+// 27 =>'# # #'&  // # #
+//     ' # # #'&  // # # #
+//     ' # # #',  //
+//  3 =>'# # #'&  // # #
+//     ' # # #'&  //   #
+//     '   # #',  //
+// 24 =>'# # #'&  //
+//     ' # # #'&  // # # #
+//     ' # # #',  //
+// 25 =>'# # #'&  // #
+//     ' # # #'&  // # # #
+//     ' # # #',  //
+// 10 =>'# # #'&  //   #
+//     ' # # #'&  // # #
+//     ' # # +',  //
+//  2 =>'# # #'&  //   #
+//     ' # # #'&  //   #
+//     ' + # +',  //
+//  1 =>'# #  '&  // #
+//     ' # # +'&  //   #
+//     '   + +',  //
+// 57 =>'# # #'&  // #
+//     ' # # #'&  // # # #
+//     ' # # #',  // #
+// 61 =>'# # #'&  // #   #
+//     ' # # #'&  // # # #
+//     ' # # #',  // #
+// 26 =>'# # #'&  //   #
+//     ' # # #'&  // # # #
+//     ' # # #',  //
+// 60 =>'# # #'&  //     #
+//     ' # # #'&  // # # #
+//     ' # # #',  // #
+// 90 =>'# # #'&  //   #
+//     ' # # #'&  // # # #
+//     ' # # #',  //   #
+//189 =>'# # #'&  // #   #
+//     ' # # #'&  // # # #
+//     ' # # #',  // #   #
+// 29 =>'# # #'&  // #   #
+//     ' # # #'&  // # # #
+//     ' # # #',  //
+// 14 =>'# # #'&  //   # #
+//     ' # # #'&  // # #
+//     ' # #  ',  //
+//126 =>'# # #'&  //   # #
+//     ' # # #'&  // # # #
+//     ' # # #',  // # #
+//  0 =>'+ # +'&  //
+//     ' # # #'&  //   #
+//     ' + # +',  //
+// 37 =>'# # #'&  // #   #
+//     ' # # #'&  //   #
+//     ' # #  ',  // #
+//165 =>'# # #'&  // #   #
+//     ' # # #'&  //   #
+//     ' # # #',  // #   #
+//
+// 58 =>'# # #'&  //   #
+//     ' # # #'&  // # # #
+//     ' # # #',  // #
+// 12 =>'# # #'&  //     #
+//     ' # # +'&  // # #
+//     ' +    ',  //
+// 55 =>'# # #'&  // # # #
+//     ' # # #'&  //   # #
+//     ' + # #',  // #
+// 13 =>'# # #'&  // #   #
+//     ' # # #'&  // # #
+//     ' # + +',  //
+// 38 =>'# # #'&  //   # #
+//     ' # # +'&  //   #
+//     ' # +  ',  // #
+// 39 =>'# # #'&  // # # #
+//     ' # # +'&  //   #
+//     ' # +  ',  // #
+// 49 =>'# # #'&  // #
+//     ' + # #'&  //   # #
+//     ' # # #',  // #
+// 50 =>'# # #'&  //   #
+//     ' # # #'&  //   # #
+//     ' # # #',  // #
+// 51 =>'# # #'&  // # #
+//     ' # # #'&  //   # #
+//     ' + # #',  // #
+// 53 =>'# # #'&  // #   #
+//     ' + # #'&  //   # #
+//     ' # # #',  // #
+// 54 =>'# # #'&  //   # #
+//     ' # # #'&  //   # #
+//     ' # # #',  // #
+// 59 =>'# # #'&  // # #
+//     ' # # #'&  // # # #
+//     ' # # #',  // #
+// 91 =>'# # #'&  // # #
+//     ' # # #'&  // # # #
+//     ' # # #',  //   #
+//117 =>'+ # #'&  // #   #
+//     ' # # #'&  //   # #
+//     ' # # #',  // # #
+//119 =>'# # #'&  // # # #
+//     ' # # #'&  //   # #
+//     ' # # #',  // # #
+//     void
+//     ]
+//     .map((e)->e[0]=>e[1].chars[[0,2,4,6,8,10,12,14,16]]).toMap;
+
+PATTERN_EXTENSIONS:=[
+255 =>'? ? ?'&  // # # #
+     ' ? ? ?'&  // # # #
+     ' ? ? ?',  // # # #
+ 31 =>'# # #'&  // # # #
+     ' # # #'&  // # # #
+     ' # # #',  //
+ 47 =>'# # #'&  // # # #
+     ' # # +'&  // # #
+     ' # + +',  // #
+127 =>'# # #'&  // # # #
+     ' # # #'&  // # # #
+     ' # # #',  // # #
+ 46 =>'# # #'&  //   # #
+     ' # # +'&  // # #
+     ' # + +',  // #
+ 36 =>'  # #'&  //     #
+     ' # # #'&  //   #
+     ' # #  ',  // #
+175 =>'# # #'&  // # # #
+     ' # # #'&  // # #
+     ' # # +',  // #   #
+ 15 =>'# # #'&  // # # #
+     ' # # +'&  // # #
+     ' + + +',  //
+ 63 =>'# # #'&  // # # #
+     ' # # #'&  // # # #
+     ' # # #',  // #
+ 62 =>'# # #'&  //   # #
+     ' # # #'&  // # # #
+     ' # # #',  // #
+  7 =>'# # #'&  // # # #
+     ' # # #'&  //   #
+     ' + # +',  //
+ 93 =>'# # #'&  // #   #
+     ' # # #'&  // # # #
+     ' # # #',  //   #
+ 95 =>'# # #'&  // # # #
+     ' # # #'&  // # # #
+     ' # # #',  //   #
+191 =>'# # #'&  // # # #
+     ' # # #'&  // # # #
+     ' # # #',  // #   #
+  5 =>'? ? ?'&  // #   #
+     ' ? ? ?'&  //   #
+     ' ? ? ?',  //
+167 =>'# # #'&  // # # #
+     ' # # #'&  //   #
+     ' + # +',  // #   #
+ 11 =>'# # #'&  // # #
+     ' # # #'&  // # #
+     ' # # +',  //
+ 27 =>'# # #'&  // # #
+     ' # # #'&  // # # #
+     ' # # #',  //
+  3 =>'# # +'&  // # #
+     ' + # +'&  //   #
+     ' + + +',  //
+ 24 =>'# # #'&  //
+     ' # # #'&  // # # #
+     ' # # #',  //
+ 25 =>'# # #'&  // #
+     ' # # #'&  // # # #
+     ' # # #',  //
+ 10 =>'# # #'&  //   #
+     ' # # #'&  // # #
+     ' # # +',  //
+  2 =>'# # #'&  //   #
+     ' # # #'&  //   #
+     ' + + +',  //
+  1 =>'# #  '&  // #
+     ' # # +'&  //   #
+     '   + +',  //
+ 57 =>'# # #'&  // #
+     ' # # #'&  // # # #
+     ' # # #',  // #
+ 61 =>'# # #'&  // #   #
+     ' # # #'&  // # # #
+     ' # # #',  // #
+ 26 =>'# # #'&  //   #
+     ' # # #'&  // # # #
+     ' # # #',  //
+ 60 =>'# # #'&  //     #
+     ' # # #'&  // # # #
+     ' # # #',  // #
+ 90 =>'# # #'&  //   #
+     ' # # #'&  // # # #
+     ' # # #',  //   #
+189 =>'# # #'&  // #   #
+     ' # # #'&  // # # #
+     ' # # #',  // #   #
+ 29 =>'# # #'&  // #   #
+     ' # # #'&  // # # #
+     ' # # #',  //
+ 14 =>'# # #'&  //   # #
+     ' # # +'&  // # #
+     ' + + +',  //
+126 =>'# # #'&  //   # #
+     ' # # #'&  // # # #
+     ' # # #',  // # #
+  0 =>'? ? ?'&  //
+     ' ? ? ?'&  //   #
+     ' ? ? ?',  //
+ 37 =>'# # #'&  // #   #
+     ' # # #'&  //   #
+     ' # #  ',  // #
+165 =>'# # #'&  // #   #
+     ' # # #'&  //   #
+     ' # # #',  // #   #
+ 58 =>'# # #'&  //   #
+     ' # # #'&  // # # #
+     ' # # #',  // #
+ 12 =>'# # #'&  //     #
+     ' # # #'&  // # #
+     ' # #  ',  //
+ 55 =>'# # #'&  // # # #
+     ' # # #'&  //   # #
+     ' + # #',  // #
+ 13 =>'? ? ?'&  // #   #
+     ' ? ? ?'&  // # #
+     ' ? ? ?',  //
+ 38 =>'? ? ?'&  //   # #
+     ' ? ? ?'&  //   #
+     ' ? ? ?',  // #
+ 39 =>'? ? ?'&  // # # #
+     ' ? ? ?'&  //   #
+     ' ? ? ?',  // #
+ 49 =>'? ? ?'&  // #
+     ' ? ? ?'&  //   # #
+     ' ? ? ?',  // #
+ 50 =>'? ? ?'&  //   #
+     ' ? ? ?'&  //   # #
+     ' ? ? ?',  // #
+ 51 =>'? ? ?'&  // # #
+     ' ? ? ?'&  //   # #
+     ' ? ? ?',  // #
+ 53 =>'? ? ?'&  // #   #
+     ' ? ? ?'&  //   # #
+     ' ? ? ?',  // #
+ 54 =>'# # #'&  //   # #
+     ' # # #'&  //   # #
+     ' # # #',  // #
+ 59 =>'# # #'&  // # #
+     ' # # #'&  // # # #
+     ' # # #',  // #
+ 91 =>'# # #'&  // # #
+     ' # # #'&  // # # #
+     ' # # #',  //   #
+117 =>'? ? ?'&  // #   #
+     ' ? ? ?'&  //   # #
+     ' ? ? ?',  // # #
+119 =>'# # #'&  // # # #
+     ' # # #'&  //   # #
+     ' # # #',  // # #
+     void
+     ]
+     .map((e)->e[0]=>e[1].chars[[0,2,4,6,8,10,12,14,16]]).toMap;
+
+
+setEl(L:List,idx,value)->L.each(x,index=idx ? value : x);
+
+generateCode(pattern_index:Int)->begin
+  local stencil:=decodePattern(pattern_index);
+  local symmetry:=SYMMETRIC_PATTERN[pattern_index] orElse [pattern_index,[0..8]];
+  local output:=PATTERN_EXTENSIONS[symmetry[0]][symmetry[1]];
+
+  local mixSimilar  :=output.map((k)->k in ['#','+','?']);
+  local mixDifferent:=output.map((k)->k in [' ','+','?']);
+
+  local useStencil:=(recX,recY,stX,stY,weight)->begin
+    local rec:=(recX+1)*3+recY+1;
+    local st :=(stX +1)*3+stY +1;
+    stencil[st] and mixSimilar[rec] or !stencil[st] and mixDifferent[rec]
+    ? [format('stencil[%s,%s,k]*',stX,stY),weight]
+    : void;
+  end;
+
+  local mix:=(recX,recY)->begin
+    local Q:=
+    (recX=0
+     ? recY=0
+       ? [[0,0,8]]
+       : [[0,0,2],[0,recY,1]]
+     : recY=0
+       ? [[0,0,2],[recX,0,1]]
+       : [[0,0,4],[recX,0,2],[0,recY,2],[recX,recY,1]])
+    .each(m,useStencil(recX,recY,m[0],m[1],m[2]));
+    local totalWeight:=Q.getInner(1).agg(+);
+    Q.size <= 1
+    ? format('  trueRb[%s,%s,k]:=%s;',recX,recY,Q[0,0].replace('*',''))
+    : format('  trueRb[%s,%s,k]:=(%s) shr 8;',
+             recX,
+             recY,
+             Q.each(entry,entry[0]&round(entry[1]*256/totalWeight)).join('+'));
+  end;
+  [-1..1].each(recX,[-1..1].each(recY,mix(recX,recY)),|).join("\n");
+end;
+
+generateCode->begin
+  clearPrint;
+  group([0..255],pMap([0..255],::generateCode)).sort(1)
+  .each(entry,begin
+     print(entry[1].join(','),": begin\n",entry[0],"\nend;");
+   end);
+end;
+
+reconstruction_mask(pattern_index:Int)->begin
+  local stencil:=decodePattern(pattern_index);
+  local symmetry:=SYMMETRIC_PATTERN[pattern_index] orElse [pattern_index,[0..8]];
+  local output:=PATTERN_EXTENSIONS[symmetry[0]][symmetry[1]];
+
+  local mixSimilar  :=output.map((k)->k in ['#','+','?']);
+  local mixDifferent:=output.map((k)->k in [' ','+','?']);
+
+  local useStencil:=(recX,recY,stX,stY,weight)->begin
+    local rec:=(recX+1)*3+recY+1;
+    local st :=(stX +1)*3+stY +1;
+     stencil[st] and mixSimilar  [rec] or
+    !stencil[st] and mixDifferent[rec]
+    ? [st,weight]
+    : void;
+  end;
+  local mix:=(recX,recY)->begin
+    local Q:=
+    (recX=0
+     ? recY=0
+       ? [[0,0,8]]
+       : [[0,0,2],[0,recY,1]]
+     : recY=0
+       ? [[0,0,2],[recX,0,1]]
+       : [[0,0,4],[recX,0,2],[0,recY,2],[recX,recY,1]])
+    .each(m,useStencil(recX,recY,m[0],m[1],m[2]));
+    local totalWeight:=Q.getInner(1).agg(+);
+    Q.getInner(1).groupToList(Q.getInner(0),0,::orElse,9)/totalWeight;
+  end;
+  [-1..1].each(recY,[-1..1].each(recX,mix(recY,recX)),|);
+end;
+
+reconstruct(stencil_:BooleanList(9))->begin
+  local inverted:=!stencil_[4];
+  local pattern_index:=encodePattern(inverted ? !stencil_ : stencil_);
+  local symmetry:=SYMMETRIC_PATTERN[pattern_index] orElse [pattern_index,[0..8]];
+  local numStencil:=ord(stencil_);
+  local r:=reconstruction_mask(pattern_index)
+  .map((w)->(w*numStencil).agg(+));
+  [r,
+   inverted ? 'i' : ' ',
+   pattern_index,
+   symmetry[0]];
+end;
+
+ANY:='?';
+
+reconstruct(stencil_:List(9))->begin
+  local stencils:=[stencil_];
+  indexOf(stencil_.map((s)->s==ANY))
+  .map((i)->((S,value)->S.each(s,index==i ? value : s)))
+  .each(f,stencils:=stencils.each(stencil,f(stencil,true),f(stencil,false)));
+  [stencils.pMap(::reconstruct).getInner(0).agg(+)/stencils.size,'?','?','?'];
+end;
+
+scaleUp(s:String,yOffset)->begin
+  local env:=s.chars[[0,2,4,6,8,10,12,14,16,18,20,22,24,26,28,30]]='#';
+  assert(env.isBooleanList(16));
+
+
+  local reconstruction:=
+  [[ANY,ANY   ,ANY,
+    ANY,env[0],env[1],
+    ANY,env[4],env[5]],
+   [ANY   ,ANY   ,ANY   ,
+    env[0],env[1],env[2],
+    env[4],env[5],env[6]],
+   [ANY   ,ANY   ,ANY   ,
+    env[1],env[2],env[3],
+    env[5],env[6],env[7]],
+   [ANY   ,ANY   ,ANY,
+    env[2],env[3],ANY,
+    env[6],env[7],ANY],
+   [ANY,env[0],env[1],
+    ANY,env[4],env[5],
+    ANY,env[8],env[9]],
+   env[[0,1, 2,
+        4,5, 6,
+        8,9,10]],
+   env[[1, 2, 3,
+        5, 6, 7,
+        9,10,11]],
+   [env[ 2],env[ 3],ANY,
+    env[ 6],env[ 7],ANY,
+    env[10],env[11],ANY],
+   [ANY,env[ 4],env[ 5],
+    ANY,env[ 8],env[ 9],
+    ANY,env[12],env[13]],
+   env[[ 4, 5, 6,
+         8, 9,10,
+        12,13,14]],
+   env[[ 5, 6, 7,
+         9,10,11,
+        13,14,15]],
+   [env[ 6],env[ 7],ANY,
+    env[10],env[11],ANY,
+    env[14],env[15],ANY],
+   [ANY,env[ 8],env[ 9],
+    ANY,env[12],env[13],
+    ANY,ANY    ,ANY],
+   [env[ 8],env[ 9],env[10],
+    env[12],env[13],env[14],
+    ANY    ,ANY    ,ANY    ],
+   [env[ 9],env[10],env[11],
+    env[13],env[14],env[15],
+    ANY    ,ANY    ,ANY    ],
+   [env[10],env[11],ANY,
+    env[14],env[15],ANY,
+    ANY    ,ANY    ,ANY]]
+  .pEach(st,reconstruct(st));
+
+  printf("\n%3s via %3s%s   | %3s via %3s%s\n"&
+         "---------------+----------------\n"&
+         "%3s via %3s%s   | %3s via %3s%s",
+         reconstruction[ 5,2],
+         reconstruction[ 5,3],
+         reconstruction[ 5,1],
+         reconstruction[ 6,2],
+         reconstruction[ 6,3],
+         reconstruction[ 6,1],
+         reconstruction[ 9,2],
+         reconstruction[ 9,3],
+         reconstruction[ 9,1],
+         reconstruction[10,2],
+         reconstruction[10,3],
+         reconstruction[10,1]);
+  local R:=1-reconstruction.getInner(0);
+
+
+  setOptions(["x0"=>-1,"x1"=>1,"y0"=>-1,"y1"=>1,"fontsize"=>10,"preserveAspect"=>true,"autoscaleX"=>true,"autoscaleY"=>true,"logscaleX"=>false,"logscaleY"=>false,"autoscaleFactor"=>1,"axisStyleX"=>0,"axisStyleY"=>0].toMap);
+  plotRasterImage(1-env.ord,4,1,0,yOffset);
+  addPlot([[4.1,1.5],[4.9,1.5],[4.9,1],[5.9,2],[4.9,3],[4.9,2.5],[4.1,2.5]]
+          .map((p)->p+[0,yOffset]),'polygon f red');
+
+  plotRasterImage([R[ 0,0],R[ 0,1],R[ 0,2],R[ 1,0],R[ 1,1],R[ 1,2],R[ 2,0],R[ 2,1],R[ 2,2],R[ 3,0],R[ 3,1],R[ 3,2],
+                   R[ 0,3],R[ 0,4],R[ 0,5],R[ 1,3],R[ 1,4],R[ 1,5],R[ 2,3],R[ 2,4],R[ 2,5],R[ 3,3],R[ 3,4],R[ 3,5],
+                   R[ 0,6],R[ 0,7],R[ 0,8],R[ 1,6],R[ 1,7],R[ 1,8],R[ 2,6],R[ 2,7],R[ 2,8],R[ 3,6],R[ 3,7],R[ 3,8],
+                   R[ 4,0],R[ 4,1],R[ 4,2],R[ 5,0],R[ 5,1],R[ 5,2],R[ 6,0],R[ 6,1],R[ 6,2],R[ 7,0],R[ 7,1],R[ 7,2],
+                   R[ 4,3],R[ 4,4],R[ 4,5],R[ 5,3],R[ 5,4],R[ 5,5],R[ 6,3],R[ 6,4],R[ 6,5],R[ 7,3],R[ 7,4],R[ 7,5],
+                   R[ 4,6],R[ 4,7],R[ 4,8],R[ 5,6],R[ 5,7],R[ 5,8],R[ 6,6],R[ 6,7],R[ 6,8],R[ 7,6],R[ 7,7],R[ 7,8],
+                   R[ 8,0],R[ 8,1],R[ 8,2],R[ 9,0],R[ 9,1],R[ 9,2],R[10,0],R[10,1],R[10,2],R[11,0],R[11,1],R[11,2],
+                   R[ 8,3],R[ 8,4],R[ 8,5],R[ 9,3],R[ 9,4],R[ 9,5],R[10,3],R[10,4],R[10,5],R[11,3],R[11,4],R[11,5],
+                   R[ 8,6],R[ 8,7],R[ 8,8],R[ 9,6],R[ 9,7],R[ 9,8],R[10,6],R[10,7],R[10,8],R[11,6],R[11,7],R[11,8],
+                   R[12,0],R[12,1],R[12,2],R[13,0],R[13,1],R[13,2],R[14,0],R[14,1],R[14,2],R[15,0],R[15,1],R[15,2],
+                   R[12,3],R[12,4],R[12,5],R[13,3],R[13,4],R[13,5],R[14,3],R[14,4],R[14,5],R[15,3],R[15,4],R[15,5],
+                   R[12,6],R[12,7],R[12,8],R[13,6],R[13,7],R[13,8],R[14,6],R[14,7],R[14,8],R[15,6],R[15,7],R[15,8]],12,1/3,6,yOffset);
+  [1..3,7..9].each(x,[x,1+yOffset],[x,3+yOffset],[Nan,Nan]).addPlot('blue');
+  (yOffset+[1..3]).each(y,[1,y],[3,y],[Nan,Nan],[7,y],[9,y],[Nan,Nan]).addPlot('blue');
+end;
+
+BIT_FLIPS:=[0..3,5..8].each(i,[0..8]=i);
+
+checkSimilarPatterns->begin
+  PATTERN_EXTENSIONS.filter((e)->'?' in e[1]).getInner(0).sort
+  .pEach(pat,begin
+     local Q0:=decodePattern(pat);
+     local R0:=reconstruct(Q0);
+     BIT_FLIPS.map((flip)->flip xor Q0).each(Q1,begin
+       local R1:=reconstruct(Q1);
+       [euklideanNorm(R0[0]-R1[0]),
+        [Q0,R0],
+        [Q1,R1]];
+     end);
+   end,|).sort;
+
+end;
+
+
+
+
+scaleUp('# #    '&
+       ' # #    '&
+       ' # # #  '&
+       ' # # #  ',0);
+
+scaleUp('# #    '&
+       ' # # #  '&
+       '   # #  '&
+       '     # #',-5);
+
+scaleUp('# #    '&
+       ' # # #  '&
+       '     # #'&
+       '     # #',-10);
+
+//checkSimilarPatterns;
+
+generateCode;
+
+

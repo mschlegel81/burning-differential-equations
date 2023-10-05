@@ -1,0 +1,51 @@
+INV_FIRE_CAP:=1/10;
+INV_FOOD_CAP:=1/10;
+DIE_THRESHOLD   :=1;
+GROWTH_THRESHOLD:=1;
+GROW_BACK_FACTOR :=0.01;
+CONSUMPTION_SPEED:=0.01;
+DIE_SPEED:=1;
+GROWTH_SPEED:=1;
+
+delta(u)->
+  [abs(u[0])*(GROW_BACK_FACTOR*(1-u[0]*INV_FOOD_CAP)-u[1]*CONSUMPTION_SPEED),
+   u[0]<DIE_THRESHOLD
+   ? (u[0]-DIE_THRESHOLD) *DIE_SPEED   *u[1]
+   : u[0]>GROWTH_THRESHOLD
+     ? (u[0]-GROWTH_THRESHOLD)*GROWTH_SPEED*abs(u[1])*(1-u[1]*INV_FIRE_CAP)
+     : 0];
+
+
+setOptions(["x0"=>-1,"x1"=>1,"y0"=>-1,"y1"=>1,"fontsize"=>10,"preserveAspect"=>false,"autoscaleX"=>true,"autoscaleY"=>true,"logscaleX"=>false,"logscaleY"=>false,"autoscaleFactor"=>1,"axisStyleX"=>7,"axisStyleY"=>7].toMap);
+dt:=1;
+begin
+//  local U:=[local u:=[1.1,1.1]];
+//  [1..1000].each(step,begin
+//    local d:=delta(u)*dt;
+//
+//    U|=[u+=d];
+//    void;
+//  end);
+//  note(u);
+//  plot(U);
+
+  local U:=[local u:=[-0.01,-0.01]];
+  local F:=[delta(u),delta(u+=dt*delta(u)),delta(u+=dt*delta(u))];
+  [1..10000].each(step,begin
+    F:=F.tail||delta(u);
+    note(u,' => ',F.trailing);
+    u:=u+dt*(1.9166666666666692*F[2]-1.3333333333333373*F[1]+0.41666666666666807*F[0]);
+
+    U|=[u];
+    void;
+  end);
+  note(u);
+  addPlot(U,'. l 0.5');
+
+
+
+end;
+
+
+
+

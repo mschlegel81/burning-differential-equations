@@ -1,0 +1,1139 @@
+object BurnForm: TBurnForm
+  Left = 574
+  Height = 648
+  Top = 211
+  Width = 1075
+  Caption = 'BurnForm'
+  ClientHeight = 648
+  ClientWidth = 1075
+  OnCloseQuery = FormCloseQuery
+  OnCreate = FormCreate
+  OnResize = FormResize
+  Position = poScreenCenter
+  LCLVersion = '2.2.2.0'
+  object Image1: TImage
+    Cursor = crCross
+    Left = 250
+    Height = 648
+    Top = 0
+    Width = 825
+    AntialiasingMode = amOff
+    Align = alClient
+    Center = True
+    OnMouseDown = Image1MouseDown
+    OnMouseMove = Image1MouseMove
+    OnMouseUp = Image1MouseUp
+    Proportional = True
+    Stretch = True
+  end
+  object containerPanel: TPanel
+    Left = 0
+    Height = 648
+    Top = 0
+    Width = 250
+    Align = alLeft
+    BevelOuter = bvNone
+    ClientHeight = 648
+    ClientWidth = 250
+    TabOrder = 0
+    object StatsGroupBox: TGroupBox
+      Left = 0
+      Height = 182
+      Top = 466
+      Width = 250
+      Align = alBottom
+      AutoSize = True
+      Caption = 'Statistics'
+      ClientHeight = 162
+      ClientWidth = 246
+      Constraints.MinWidth = 180
+      TabOrder = 0
+      object Label1: TLabel
+        AnchorSideLeft.Control = StatsGroupBox
+        AnchorSideTop.Control = StatsGroupBox
+        Left = 0
+        Height = 15
+        Top = 0
+        Width = 55
+        Caption = 'Food avg :'
+        ParentColor = False
+      end
+      object Label2: TLabel
+        AnchorSideTop.Control = Label1
+        AnchorSideTop.Side = asrBottom
+        AnchorSideRight.Control = Label1
+        AnchorSideRight.Side = asrBottom
+        Left = 28
+        Height = 15
+        Top = 19
+        Width = 27
+        Anchors = [akTop, akRight]
+        BorderSpacing.Top = 4
+        Caption = 'min :'
+        ParentColor = False
+      end
+      object Label3: TLabel
+        AnchorSideTop.Control = Label2
+        AnchorSideTop.Side = asrBottom
+        AnchorSideRight.Control = Label2
+        AnchorSideRight.Side = asrBottom
+        Left = 26
+        Height = 15
+        Top = 38
+        Width = 29
+        Anchors = [akTop, akRight]
+        BorderSpacing.Top = 4
+        Caption = 'max :'
+        ParentColor = False
+      end
+      object Label4: TLabel
+        AnchorSideTop.Control = Label3
+        AnchorSideTop.Side = asrBottom
+        AnchorSideRight.Control = Label1
+        AnchorSideRight.Side = asrBottom
+        Left = 8
+        Height = 15
+        Top = 61
+        Width = 47
+        Anchors = [akTop, akRight]
+        BorderSpacing.Top = 8
+        BorderSpacing.Bottom = 4
+        Caption = 'Fire avg :'
+        ParentColor = False
+      end
+      object statLabel_food_avg: TLabel
+        AnchorSideLeft.Control = Label1
+        AnchorSideLeft.Side = asrBottom
+        AnchorSideTop.Control = Label1
+        AnchorSideTop.Side = asrCenter
+        Left = 63
+        Height = 15
+        Top = 0
+        Width = 6
+        BorderSpacing.Left = 8
+        Caption = '0'
+        ParentColor = False
+      end
+      object statLabel_food_min: TLabel
+        AnchorSideLeft.Control = Label2
+        AnchorSideLeft.Side = asrBottom
+        AnchorSideTop.Control = Label2
+        AnchorSideTop.Side = asrCenter
+        Left = 63
+        Height = 15
+        Top = 19
+        Width = 6
+        BorderSpacing.Left = 8
+        Caption = '0'
+        ParentColor = False
+      end
+      object statLabel_food_max: TLabel
+        AnchorSideLeft.Control = Label3
+        AnchorSideLeft.Side = asrBottom
+        AnchorSideTop.Control = Label3
+        AnchorSideTop.Side = asrCenter
+        Left = 63
+        Height = 15
+        Top = 38
+        Width = 6
+        BorderSpacing.Left = 8
+        Caption = '0'
+        ParentColor = False
+      end
+      object statLabel_fire_avg: TLabel
+        AnchorSideLeft.Control = Label4
+        AnchorSideLeft.Side = asrBottom
+        AnchorSideTop.Control = Label4
+        AnchorSideTop.Side = asrCenter
+        Left = 63
+        Height = 15
+        Top = 61
+        Width = 6
+        BorderSpacing.Left = 8
+        Caption = '0'
+        ParentColor = False
+      end
+      object Label5: TLabel
+        AnchorSideTop.Control = Label4
+        AnchorSideTop.Side = asrBottom
+        AnchorSideRight.Control = Label1
+        AnchorSideRight.Side = asrBottom
+        Left = 28
+        Height = 15
+        Top = 80
+        Width = 27
+        Anchors = [akTop, akRight]
+        BorderSpacing.Top = 4
+        Caption = 'min :'
+        ParentColor = False
+      end
+      object Label6: TLabel
+        AnchorSideTop.Control = Label5
+        AnchorSideTop.Side = asrBottom
+        AnchorSideRight.Control = Label5
+        AnchorSideRight.Side = asrBottom
+        Left = 26
+        Height = 15
+        Top = 99
+        Width = 29
+        Anchors = [akTop, akRight]
+        BorderSpacing.Top = 4
+        Caption = 'max :'
+        ParentColor = False
+      end
+      object statLabel_fire_min: TLabel
+        AnchorSideLeft.Control = Label5
+        AnchorSideLeft.Side = asrBottom
+        AnchorSideTop.Control = Label5
+        AnchorSideTop.Side = asrCenter
+        Left = 63
+        Height = 15
+        Top = 80
+        Width = 6
+        BorderSpacing.Left = 8
+        Caption = '0'
+        ParentColor = False
+      end
+      object statLabel_fire_max: TLabel
+        AnchorSideLeft.Control = Label6
+        AnchorSideLeft.Side = asrBottom
+        AnchorSideTop.Control = Label6
+        AnchorSideTop.Side = asrCenter
+        Left = 63
+        Height = 15
+        Top = 99
+        Width = 6
+        BorderSpacing.Left = 8
+        Caption = '0'
+        ParentColor = False
+      end
+      object AACheckBox: TCheckBox
+        AnchorSideLeft.Control = StatsGroupBox
+        AnchorSideTop.Control = Label6
+        AnchorSideTop.Side = asrBottom
+        Left = 4
+        Height = 19
+        Top = 118
+        Width = 102
+        Align = alCustom
+        BorderSpacing.Left = 4
+        BorderSpacing.Top = 4
+        Caption = 'Smooth scaling'
+        OnClick = AACheckBoxClick
+        TabOrder = 0
+      end
+      object PauseButton: TToggleBox
+        AnchorSideLeft.Control = StatsGroupBox
+        AnchorSideTop.Control = AACheckBox
+        AnchorSideTop.Side = asrBottom
+        AnchorSideRight.Control = StatsGroupBox
+        AnchorSideRight.Side = asrBottom
+        Left = 4
+        Height = 25
+        Top = 137
+        Width = 238
+        Align = alCustom
+        Anchors = [akTop, akLeft, akRight]
+        BorderSpacing.Left = 4
+        BorderSpacing.Right = 4
+        Caption = 'Pause'
+        OnClick = PauseButtonClick
+        TabOrder = 1
+      end
+    end
+    object PageControl1: TPageControl
+      Left = 0
+      Height = 466
+      Top = 0
+      Width = 250
+      ActivePage = TabSheet1
+      Align = alClient
+      TabIndex = 0
+      TabOrder = 1
+      object TabSheet1: TTabSheet
+        Caption = 'phy'
+        ClientHeight = 438
+        ClientWidth = 242
+        object ConfigPanel: TPanel
+          Left = 0
+          Height = 438
+          Top = 0
+          Width = 242
+          Align = alClient
+          BevelColor = clBlack
+          BevelOuter = bvNone
+          BorderStyle = bsSingle
+          ClientHeight = 434
+          ClientWidth = 238
+          Color = clBtnFace
+          Constraints.MinWidth = 160
+          ParentColor = False
+          TabOrder = 0
+          object GroupBox1: TGroupBox
+            Left = 0
+            Height = 100
+            Top = 0
+            Width = 238
+            Align = alTop
+            AutoSize = True
+            Caption = 'Movement'
+            ClientHeight = 80
+            ClientWidth = 234
+            TabOrder = 0
+            object FoodMovementLabel: TLabel
+              Left = 0
+              Height = 15
+              Top = 0
+              Width = 234
+              Align = alTop
+              Caption = 'Food: -0.25'
+              ParentColor = False
+            end
+            object FoodMovementTrackBar: TTrackBar
+              Left = 0
+              Height = 25
+              Top = 15
+              Width = 234
+              Frequency = 10
+              Max = 50
+              Min = -50
+              OnChange = FoodMovementTrackBarChange
+              PageSize = 10
+              Position = -35
+              Align = alTop
+              TabOrder = 0
+            end
+            object FireMovementLabel: TLabel
+              Left = 0
+              Height = 15
+              Top = 40
+              Width = 234
+              Align = alTop
+              Caption = 'Fire: 0.25'
+              ParentColor = False
+            end
+            object FireMovementTrackBar: TTrackBar
+              Left = 0
+              Height = 25
+              Top = 55
+              Width = 234
+              Frequency = 10
+              Max = 50
+              Min = -50
+              OnChange = FireMovementTrackBarChange
+              PageSize = 10
+              Position = 25
+              Align = alTop
+              TabOrder = 1
+            end
+          end
+          object GroupBox2: TGroupBox
+            Left = 0
+            Height = 100
+            Top = 100
+            Width = 238
+            Align = alTop
+            AutoSize = True
+            Caption = 'Food'
+            ClientHeight = 80
+            ClientWidth = 234
+            TabOrder = 1
+            object BurnDownLabel: TLabel
+              Left = 0
+              Height = 15
+              Top = 0
+              Width = 234
+              Align = alTop
+              Caption = 'Burn down: 0.01'
+              ParentColor = False
+            end
+            object BurnDownTrackBar: TTrackBar
+              Left = 0
+              Height = 25
+              Top = 15
+              Width = 234
+              Frequency = 10
+              Max = 40
+              Min = -40
+              OnChange = BurnDownTrackBarChange
+              PageSize = 10
+              Position = 0
+              Align = alTop
+              TabOrder = 0
+            end
+            object GrowBackLabel: TLabel
+              Left = 0
+              Height = 15
+              Top = 40
+              Width = 234
+              Align = alTop
+              Caption = 'Grow back: 0.01'
+              ParentColor = False
+            end
+            object GrowBackTrackBar: TTrackBar
+              Left = 0
+              Height = 25
+              Top = 55
+              Width = 234
+              Frequency = 10
+              Max = 40
+              Min = -40
+              OnChange = GrowBackTrackBarChange
+              PageSize = 10
+              Position = 0
+              Align = alTop
+              TabOrder = 1
+            end
+          end
+          object GroupBox3: TGroupBox
+            Left = 0
+            Height = 190
+            Top = 200
+            Width = 238
+            Align = alTop
+            AutoSize = True
+            Caption = 'Fire'
+            ClientHeight = 170
+            ClientWidth = 234
+            TabOrder = 2
+            object FireGrowthLabel: TLabel
+              Left = 0
+              Height = 15
+              Top = 0
+              Width = 234
+              Align = alTop
+              Caption = 'Growth: 0.5'
+              ParentColor = False
+            end
+            object FireGrowthTrackBar: TTrackBar
+              Left = 0
+              Height = 25
+              Top = 15
+              Width = 234
+              Frequency = 10
+              Max = 40
+              Min = -40
+              OnChange = FireGrowthTrackBarChange
+              PageSize = 10
+              Position = -6
+              Align = alTop
+              TabOrder = 0
+            end
+            object FireDieLabel: TLabel
+              Left = 0
+              Height = 15
+              Top = 40
+              Width = 234
+              Align = alTop
+              Caption = 'Die: 10'
+              ParentColor = False
+            end
+            object FireDieTrackBar: TTrackBar
+              Left = 0
+              Height = 25
+              Top = 55
+              Width = 234
+              Frequency = 10
+              Max = 40
+              Min = -40
+              OnChange = FireDieTrackBarChange
+              PageSize = 10
+              Position = 20
+              Align = alTop
+              TabOrder = 1
+            end
+            object ThresholdsLabel: TLabel
+              Left = 0
+              Height = 15
+              Top = 80
+              Width = 234
+              Align = alTop
+              Caption = 'Thresholds'
+              ParentColor = False
+            end
+            object DieThresholdTrackBar: TTrackBar
+              Left = 0
+              Height = 25
+              Top = 95
+              Width = 234
+              Frequency = 10
+              Max = 100
+              OnChange = DieThresholdTrackBarChange
+              PageSize = 10
+              Position = 25
+              Align = alTop
+              TabOrder = 2
+            end
+            object GrowthThresholdTrackBar: TTrackBar
+              Left = 0
+              Height = 25
+              Top = 120
+              Width = 234
+              Frequency = 10
+              Max = 100
+              OnChange = GrowthThresholdTrackBarChange
+              PageSize = 10
+              Position = 100
+              Align = alTop
+              TabOrder = 3
+            end
+            object AutoThresholdsButton: TButton
+              Left = 0
+              Height = 25
+              Top = 145
+              Width = 234
+              Align = alTop
+              Caption = '...from current state'
+              OnClick = AutoThresholdsButtonClick
+              TabOrder = 4
+            end
+          end
+        end
+      end
+      object TabSheet4: TTabSheet
+        Caption = 'disc'
+        ClientHeight = 438
+        ClientWidth = 242
+        object DiscretizationPanel: TPanel
+          Left = 0
+          Height = 438
+          Top = 0
+          Width = 242
+          Align = alClient
+          BevelOuter = bvNone
+          ClientHeight = 438
+          ClientWidth = 242
+          Color = clBtnFace
+          ParentColor = False
+          TabOrder = 0
+          object GroupBox4: TGroupBox
+            Left = 0
+            Height = 96
+            Top = 0
+            Width = 242
+            Align = alTop
+            AutoSize = True
+            Caption = 'Spatial discretization'
+            ClientHeight = 76
+            ClientWidth = 238
+            TabOrder = 0
+            object rbUpwind1: TRadioButton
+              Left = 0
+              Height = 19
+              Top = 0
+              Width = 238
+              Align = alTop
+              Caption = '1st order upwind'
+              OnChange = rbUpwind1Change
+              TabOrder = 0
+            end
+            object rbUpwind3: TRadioButton
+              Left = 0
+              Height = 19
+              Top = 38
+              Width = 238
+              Align = alTop
+              Caption = '3rd order upwind'
+              OnChange = rbUpwind1Change
+              TabOrder = 2
+            end
+            object rbUpwind3L: TRadioButton
+              Left = 0
+              Height = 19
+              Top = 57
+              Width = 238
+              Align = alTop
+              Caption = '3rd order upwind with limiter'
+              Checked = True
+              OnChange = rbUpwind1Change
+              TabOrder = 3
+              TabStop = True
+            end
+            object rb2ndOrderCentral: TRadioButton
+              Left = 0
+              Height = 19
+              Top = 19
+              Width = 238
+              Align = alTop
+              Caption = '2nd order central'
+              OnChange = rbUpwind1Change
+              TabOrder = 1
+            end
+          end
+          object GroupBox5: TGroupBox
+            Left = 0
+            Height = 231
+            Top = 96
+            Width = 242
+            Align = alTop
+            AutoSize = True
+            Caption = 'Time integration'
+            ClientHeight = 211
+            ClientWidth = 238
+            TabOrder = 1
+            object rbERKHeunEuler: TRadioButton
+              Left = 0
+              Height = 19
+              Top = 0
+              Width = 238
+              Align = alTop
+              Caption = 'Heun-Euler (2nd order)'
+              OnChange = rbERKHeunEulerChange
+              TabOrder = 0
+            end
+            object rbERKBogackiShampine: TRadioButton
+              Left = 0
+              Height = 19
+              Top = 19
+              Width = 238
+              Align = alTop
+              Caption = 'Bogacki-Shampine (3rd order)'
+              Checked = True
+              TabOrder = 1
+              TabStop = True
+            end
+            object rbERKCashCarp: TRadioButton
+              Left = 0
+              Height = 19
+              Top = 38
+              Width = 238
+              Align = alTop
+              Caption = 'Cash-Carp (5th order)'
+              OnChange = rbERKHeunEulerChange
+              TabOrder = 2
+            end
+            object errorToleranceLabel: TLabel
+              AnchorSideTop.Control = Multistep_order_spinEdit
+              AnchorSideTop.Side = asrBottom
+              Left = 5
+              Height = 15
+              Top = 171
+              Width = 89
+              Align = alCustom
+              BorderSpacing.Left = 5
+              BorderSpacing.Top = 5
+              Caption = 'Error tolerance: 1'
+              ParentColor = False
+            end
+            object ErrorToleranceTrackBar: TTrackBar
+              AnchorSideLeft.Control = GroupBox5
+              AnchorSideTop.Control = errorToleranceLabel
+              AnchorSideTop.Side = asrBottom
+              AnchorSideRight.Control = GroupBox5
+              AnchorSideRight.Side = asrBottom
+              Left = 0
+              Height = 25
+              Top = 186
+              Width = 238
+              Frequency = 5
+              Min = -60
+              OnChange = ErrorToleranceTrackBarChange
+              PageSize = 10
+              Position = 0
+              Align = alCustom
+              Anchors = [akTop, akLeft, akRight]
+              TabOrder = 6
+            end
+            object rbERKBSB_custom: TRadioButton
+              Left = 0
+              Height = 19
+              Top = 57
+              Width = 238
+              Align = alTop
+              Caption = 'SSP-EERK (3rd order)'
+              OnChange = rbERKHeunEulerChange
+              TabOrder = 3
+            end
+            object rbMultistep: TRadioButton
+              Left = 0
+              Height = 19
+              Top = 101
+              Width = 238
+              Align = alTop
+              BorderSpacing.Top = 6
+              Caption = 'Multistep'
+              OnChange = rbERKHeunEulerChange
+              TabOrder = 5
+            end
+            object rbERKBSB_custom1: TRadioButton
+              Left = 0
+              Height = 19
+              Top = 76
+              Width = 238
+              Align = alTop
+              Caption = 'SSP-EERK (4th order)'
+              OnChange = rbERKHeunEulerChange
+              TabOrder = 4
+            end
+            object Label7: TLabel
+              AnchorSideLeft.Control = rbMultistep
+              AnchorSideTop.Control = Multistep_steps_spinEdit
+              AnchorSideTop.Side = asrCenter
+              Left = 0
+              Height = 15
+              Top = 124
+              Width = 31
+              Caption = 'Steps:'
+              ParentColor = False
+            end
+            object Multistep_steps_spinEdit: TSpinEdit
+              AnchorSideLeft.Control = Label7
+              AnchorSideLeft.Side = asrBottom
+              AnchorSideTop.Control = rbMultistep
+              AnchorSideTop.Side = asrBottom
+              AnchorSideRight.Control = GroupBox5
+              AnchorSideRight.Side = asrBottom
+              Left = 35
+              Height = 23
+              Top = 120
+              Width = 199
+              Anchors = [akTop, akLeft, akRight]
+              BorderSpacing.Left = 4
+              BorderSpacing.Right = 4
+              MaxValue = 6
+              MinValue = 2
+              OnChange = Multistep_steps_spinEditChange
+              TabOrder = 7
+              Value = 3
+            end
+            object Multistep_order_spinEdit: TSpinEdit
+              AnchorSideLeft.Control = Multistep_steps_spinEdit
+              AnchorSideTop.Control = Multistep_steps_spinEdit
+              AnchorSideTop.Side = asrBottom
+              AnchorSideRight.Control = Multistep_steps_spinEdit
+              AnchorSideRight.Side = asrBottom
+              Left = 35
+              Height = 23
+              Top = 143
+              Width = 199
+              Anchors = [akTop, akLeft, akRight]
+              MaxValue = 6
+              MinValue = 2
+              OnChange = Multistep_order_spinEditChange
+              TabOrder = 8
+              Value = 3
+            end
+            object Label8: TLabel
+              AnchorSideLeft.Control = GroupBox5
+              AnchorSideTop.Control = Multistep_order_spinEdit
+              AnchorSideTop.Side = asrCenter
+              Left = 0
+              Height = 15
+              Top = 147
+              Width = 33
+              Caption = 'Order:'
+              ParentColor = False
+            end
+          end
+        end
+      end
+      object TabSheet2: TTabSheet
+        Caption = 'set'
+        ClientHeight = 438
+        ClientWidth = 242
+        object StatePanel: TPanel
+          Left = 0
+          Height = 438
+          Top = 0
+          Width = 242
+          Align = alClient
+          ClientHeight = 438
+          ClientWidth = 242
+          Color = clBtnFace
+          ParentColor = False
+          TabOrder = 0
+          object GroupBox6: TGroupBox
+            Left = 1
+            Height = 70
+            Top = 1
+            Width = 240
+            Align = alTop
+            AutoSize = True
+            Caption = 'Set state'
+            ClientHeight = 50
+            ClientWidth = 236
+            TabOrder = 0
+            object SetStateFromPreset0: TButton
+              AnchorSideLeft.Control = GroupBox6
+              AnchorSideTop.Side = asrBottom
+              Left = 0
+              Height = 25
+              Top = 0
+              Width = 35
+              Caption = '0'
+              OnClick = SetStateFromPreset0Click
+              TabOrder = 0
+            end
+            object SetStateFromPreset1: TButton
+              AnchorSideLeft.Control = SetStateFromPreset0
+              AnchorSideLeft.Side = asrBottom
+              AnchorSideTop.Side = asrBottom
+              Left = 35
+              Height = 25
+              Top = 0
+              Width = 35
+              Caption = '1'
+              OnClick = SetStateFromPreset1Click
+              TabOrder = 1
+            end
+            object SetStateFromPreset2: TButton
+              AnchorSideLeft.Control = SetStateFromPreset1
+              AnchorSideLeft.Side = asrBottom
+              AnchorSideTop.Side = asrBottom
+              Left = 70
+              Height = 25
+              Top = 0
+              Width = 35
+              Caption = '2'
+              OnClick = SetStateFromPreset2Click
+              TabOrder = 2
+            end
+            object SetStateFromPreset3: TButton
+              AnchorSideLeft.Control = SetStateFromPreset2
+              AnchorSideLeft.Side = asrBottom
+              AnchorSideTop.Side = asrBottom
+              Left = 105
+              Height = 25
+              Top = 0
+              Width = 35
+              Caption = '3'
+              OnClick = SetStateFromPreset3Click
+              TabOrder = 3
+            end
+            object SetStateFromPreset4: TButton
+              AnchorSideLeft.Control = SetStateFromPreset3
+              AnchorSideLeft.Side = asrBottom
+              AnchorSideTop.Side = asrBottom
+              Left = 140
+              Height = 25
+              Top = 0
+              Width = 35
+              Caption = '4'
+              OnClick = SetStateFromPreset4Click
+              TabOrder = 4
+            end
+            object SetStateFromPreset5: TButton
+              AnchorSideLeft.Control = SetStateFromPreset0
+              AnchorSideLeft.Side = asrCenter
+              AnchorSideTop.Control = SetStateFromPreset1
+              AnchorSideTop.Side = asrBottom
+              Left = 0
+              Height = 25
+              Top = 25
+              Width = 35
+              Caption = '5'
+              OnClick = SetStateFromPreset5Click
+              TabOrder = 5
+            end
+            object SetStateFromPreset6: TButton
+              AnchorSideLeft.Control = SetStateFromPreset1
+              AnchorSideLeft.Side = asrCenter
+              AnchorSideTop.Control = SetStateFromPreset2
+              AnchorSideTop.Side = asrBottom
+              Left = 35
+              Height = 25
+              Top = 25
+              Width = 35
+              Caption = '6'
+              OnClick = SetStateFromPreset6Click
+              TabOrder = 6
+            end
+            object SetStateFromPreset7: TButton
+              AnchorSideLeft.Control = SetStateFromPreset2
+              AnchorSideLeft.Side = asrCenter
+              AnchorSideTop.Control = SetStateFromPreset3
+              AnchorSideTop.Side = asrBottom
+              Left = 70
+              Height = 25
+              Top = 25
+              Width = 35
+              Caption = '7'
+              OnClick = SetStateFromPreset7Click
+              TabOrder = 7
+            end
+          end
+          object GroupBox8: TGroupBox
+            Left = 1
+            Height = 226
+            Top = 71
+            Width = 240
+            Align = alTop
+            Caption = 'Snapshots'
+            ClientHeight = 206
+            ClientWidth = 236
+            TabOrder = 1
+            object SnapshotsStringGrid: TStringGrid
+              Left = 0
+              Height = 100
+              Top = 25
+              Width = 236
+              Align = alTop
+              AutoFillColumns = True
+              ColCount = 1
+              ExtendedSelect = False
+              FixedCols = 0
+              FixedRows = 0
+              Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goEditing, goSmoothScroll, goSelectionActive, goRowHighlight]
+              TabOrder = 0
+              OnValidateEntry = SnapshotsStringGridValidateEntry
+              ColWidths = (
+                215
+              )
+            end
+            object snapshot_include_state_checkbox: TCheckBox
+              Left = 0
+              Height = 19
+              Top = 125
+              Width = 236
+              Align = alTop
+              Caption = 'include state'
+              Checked = True
+              State = cbChecked
+              TabOrder = 1
+            end
+            object snapshot_include_physics_checkbox: TCheckBox
+              Left = 0
+              Height = 19
+              Top = 144
+              Width = 236
+              Align = alTop
+              Caption = 'include physics'
+              TabOrder = 2
+            end
+            object snapshot_include_discretization_checkbox: TCheckBox
+              Left = 0
+              Height = 19
+              Top = 163
+              Width = 236
+              Align = alTop
+              Caption = 'include discretization'
+              TabOrder = 3
+            end
+            object snapshotButton: TButton
+              Left = 0
+              Height = 25
+              Top = 0
+              Width = 236
+              Align = alTop
+              Caption = 'take snapshot'
+              OnClick = snapshotButtonClick
+              TabOrder = 4
+            end
+            object SetStateFromSnapshotButton: TButton
+              Left = 0
+              Height = 25
+              Top = 182
+              Width = 236
+              Align = alTop
+              Caption = 'From snapshot'
+              OnClick = SetStateFromSnapshotButtonClick
+              TabOrder = 5
+            end
+            object delete_snapshot_button: TButton
+              AnchorSideTop.Control = SnapshotsStringGrid
+              AnchorSideTop.Side = asrBottom
+              AnchorSideRight.Control = SnapshotsStringGrid
+              AnchorSideRight.Side = asrBottom
+              Left = 194
+              Height = 25
+              Top = 125
+              Width = 42
+              Align = alCustom
+              Anchors = [akTop, akRight]
+              AutoSize = True
+              Caption = 'del'
+              OnClick = delete_snapshot_buttonClick
+              TabOrder = 6
+            end
+          end
+        end
+      end
+      object TabSheet3: TTabSheet
+        Caption = 'rec'
+        ClientHeight = 438
+        ClientWidth = 242
+        object RecorderPanel: TPanel
+          Left = 0
+          Height = 438
+          Top = 0
+          Width = 242
+          Align = alClient
+          BevelOuter = bvNone
+          ClientHeight = 438
+          ClientWidth = 242
+          Color = clBtnFace
+          ParentColor = False
+          TabOrder = 0
+          object StartRecordingButton: TButton
+            Left = 0
+            Height = 25
+            Top = 0
+            Width = 242
+            Align = alTop
+            Caption = 'Start Recording'
+            OnClick = StartRecordingButtonClick
+            TabOrder = 0
+          end
+          object RecorderFilenameLabel: TLabel
+            Left = 0
+            Height = 15
+            Top = 29
+            Width = 242
+            Align = alTop
+            BorderSpacing.Top = 4
+            Caption = '-'
+            ParentColor = False
+          end
+          object OpenRecordingButton: TButton
+            Left = 0
+            Height = 25
+            Top = 71
+            Width = 242
+            Align = alTop
+            BorderSpacing.Top = 8
+            Caption = 'Open Recording'
+            OnClick = OpenRecordingButtonClick
+            TabOrder = 1
+          end
+          object CloseRecordingButton: TButton
+            Left = 0
+            Height = 25
+            Top = 96
+            Width = 242
+            Align = alTop
+            Caption = 'Close Recording'
+            Enabled = False
+            OnClick = CloseRecordingButtonClick
+            TabOrder = 2
+          end
+          object GroupBox7: TGroupBox
+            Left = 0
+            Height = 45
+            Top = 121
+            Width = 242
+            Align = alTop
+            AutoSize = True
+            Caption = 'Playback speed'
+            ClientHeight = 25
+            ClientWidth = 238
+            TabOrder = 3
+            object PlaybackSpeedTrackBar: TTrackBar
+              Left = 0
+              Height = 25
+              Top = 0
+              Width = 238
+              Frequency = 10
+              Max = 50
+              Min = 1
+              OnChange = PlaybackSpeedTrackBarChange
+              Position = 50
+              Align = alTop
+              TabOrder = 0
+            end
+          end
+          object ExportRecordingButton: TButton
+            Left = 0
+            Height = 25
+            Top = 166
+            Width = 242
+            Align = alTop
+            Caption = 'Export Recording to PNG'
+            Enabled = False
+            OnClick = ExportRecordingButtonClick
+            TabOrder = 4
+          end
+          object exportProgressBar: TProgressBar
+            Left = 0
+            Height = 20
+            Top = 191
+            Width = 242
+            Align = alTop
+            Max = 200
+            TabOrder = 5
+          end
+          object RecorderStatusLabel: TLabel
+            Left = 0
+            Height = 15
+            Top = 48
+            Width = 242
+            Align = alTop
+            BorderSpacing.Top = 4
+            Caption = '-'
+            ParentColor = False
+          end
+          object ExportRecordingBGButton: TButton
+            Left = 0
+            Height = 25
+            Top = 211
+            Width = 242
+            Align = alTop
+            Caption = 'Export to PNG in Background'
+            Enabled = False
+            OnClick = ExportRecordingBGButtonClick
+            TabOrder = 6
+          end
+        end
+      end
+    end
+  end
+  object PlaybackTrackBar: TTrackBar
+    AnchorSideLeft.Control = PlayPauseButton
+    AnchorSideLeft.Side = asrBottom
+    AnchorSideRight.Control = Image1
+    AnchorSideRight.Side = asrBottom
+    AnchorSideBottom.Control = Image1
+    AnchorSideBottom.Side = asrBottom
+    Left = 302
+    Height = 25
+    Top = 593
+    Width = 743
+    Frequency = 10
+    OnChange = PlaybackTrackBarChange
+    PageSize = 10
+    Position = 0
+    Anchors = [akLeft, akRight, akBottom]
+    BorderSpacing.Right = 30
+    BorderSpacing.Bottom = 30
+    Color = clBtnFace
+    ParentColor = False
+    TabOrder = 1
+    Visible = False
+  end
+  object PlayPauseButton: TButton
+    AnchorSideLeft.Control = Image1
+    AnchorSideBottom.Control = Image1
+    AnchorSideBottom.Side = asrBottom
+    Left = 280
+    Height = 25
+    Top = 593
+    Width = 22
+    Anchors = [akLeft, akBottom]
+    BorderSpacing.Left = 30
+    BorderSpacing.Bottom = 30
+    Caption = '||'
+    OnClick = PlayPauseButtonClick
+    TabOrder = 2
+    Visible = False
+  end
+  object Timer1: TTimer
+    Enabled = False
+    Interval = 5
+    OnTimer = IdleTimer1Timer
+    Left = 256
+    Top = 32
+  end
+  object OpenDialog1: TOpenDialog
+    Title = 'Open recording'
+    DefaultExt = '.recording'
+    Filter = 'recording|*.recording'
+    Options = [ofFileMustExist, ofEnableSizing, ofViewDetail]
+    Left = 247
+    Top = 114
+  end
+  object SaveDialog1: TSaveDialog
+    DefaultExt = '.recording'
+    Filter = 'recording|*.recording|Portable Networks Graphics|*.png'
+    Left = 247
+    Top = 177
+  end
+end

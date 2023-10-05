@@ -2,3 +2,4 @@
 burn*.cfg
 *.exe
 lib/*
+/burnProject.lps

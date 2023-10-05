@@ -854,20 +854,20 @@ object BurnForm: TBurnForm
           end
           object GroupBox8: TGroupBox
             Left = 1
-            Height = 226
+            Height = 366
             Top = 71
             Width = 240
-            Align = alTop
+            Align = alClient
             Caption = 'Snapshots'
-            ClientHeight = 206
+            ClientHeight = 346
             ClientWidth = 236
             TabOrder = 1
             object SnapshotsStringGrid: TStringGrid
               Left = 0
-              Height = 100
+              Height = 239
               Top = 25
               Width = 236
-              Align = alTop
+              Align = alClient
               AutoFillColumns = True
               ColCount = 1
               ExtendedSelect = False
@@ -877,15 +877,15 @@ object BurnForm: TBurnForm
               TabOrder = 0
               OnValidateEntry = SnapshotsStringGridValidateEntry
               ColWidths = (
-                215
+                232
               )
             end
             object snapshot_include_state_checkbox: TCheckBox
               Left = 0
               Height = 19
-              Top = 125
+              Top = 264
               Width = 236
-              Align = alTop
+              Align = alBottom
               Caption = 'include state'
               Checked = True
               State = cbChecked
@@ -894,18 +894,18 @@ object BurnForm: TBurnForm
             object snapshot_include_physics_checkbox: TCheckBox
               Left = 0
               Height = 19
-              Top = 144
+              Top = 283
               Width = 236
-              Align = alTop
+              Align = alBottom
               Caption = 'include physics'
               TabOrder = 2
             end
             object snapshot_include_discretization_checkbox: TCheckBox
               Left = 0
               Height = 19
-              Top = 163
+              Top = 302
               Width = 236
-              Align = alTop
+              Align = alBottom
               Caption = 'include discretization'
               TabOrder = 3
             end
@@ -922,9 +922,9 @@ object BurnForm: TBurnForm
             object SetStateFromSnapshotButton: TButton
               Left = 0
               Height = 25
-              Top = 182
+              Top = 321
               Width = 236
-              Align = alTop
+              Align = alBottom
               Caption = 'From snapshot'
               OnClick = SetStateFromSnapshotButtonClick
               TabOrder = 5
@@ -936,7 +936,7 @@ object BurnForm: TBurnForm
               AnchorSideRight.Side = asrBottom
               Left = 194
               Height = 25
-              Top = 125
+              Top = 264
               Width = 42
               Align = alCustom
               Anchors = [akTop, akRight]

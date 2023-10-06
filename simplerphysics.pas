@@ -1,7 +1,6 @@
 UNIT simplerPhysics;
 
 {$mode objfpc}{$H+}
-
 INTERFACE
 USES basicGraphics, serializationUtil;
 CONST
@@ -32,6 +31,7 @@ TYPE
 
   T_State=array[0..SYS_HEIGHT-1,0..SYS_WIDTH-1] of T_cell;
   T_timeIntegrationMethod=(HEUN_EULER, BOGACKI_SHAMPINE, CASH_CARP, BSB_SSP_3, BSB_SSP_4, MULTISTEP);
+
   T_spatial_discretization=(FIRST_ORDER_UPWIND,SECOND_ORDER_CENTRAL,THIRD_ORDER_UPWIND,LIMITED_THIRD_ORDER_UPWIND);
   T_derivativeFunction=FUNCTION(CONST s:T_State):T_State;
   {$ifdef multithreading}
@@ -71,8 +71,8 @@ TYPE
       {$ifdef multithreading}
       usercs:TRTLCriticalSection;
       {$endif}
-    public
       errorTolerance:TmyFloat;
+    public
       recording:boolean;
       CONSTRUCTOR create;
       DESTRUCTOR destroy;
@@ -87,6 +87,7 @@ TYPE
       PROCEDURE logSettingChanged;
       PROCEDURE setTimeIntegrationMethod(CONST mehod:T_timeIntegrationMethod; CONST ms_steps,ms_order:longint);
       PROCEDURE setSpatialDiscretization(CONST spatial_discretization:T_spatial_discretization);
+      PROCEDURE setErrorTolerance(CONST newTol:TmyFloat);
       {$ifdef multithreading}
       FUNCTION getSnapshot:T_State;
       PROCEDURE setState(CONST state:T_State);
@@ -158,9 +159,10 @@ TYPE
 
   T_persistedState=object(T_serializable)
     snapshots:array of P_snapshot;
-
+    {$ifdef enable_calibration}
     calibration_handle:textFile;
     calibration_open:boolean;
+    {$endif}
 
     CONSTRUCTOR create;
     DESTRUCTOR destroy;
@@ -172,7 +174,9 @@ TYPE
     FUNCTION loadFromStream(VAR stream:T_bufferedInputStreamWrapper):boolean; virtual;
     PROCEDURE saveToStream(VAR stream:T_bufferedOutputStreamWrapper); virtual;
 
+    {$ifdef enable_calibration}
     PROCEDURE addCalibrationData(CONST method:T_timeIntegrationMethod; CONST steps,order:longint; CONST initialState, approximation:T_State; CONST D:T_derivativeFunction; CONST dt,estimatedError:TmyFloat);
+    {$endif}
   end;
 
 VAR persistedState:T_persistedState;
@@ -193,18 +197,16 @@ FUNCTION get_equationParameters:T_equationParameters; begin result:=equationPara
 { T_persistedState }
 
 CONSTRUCTOR T_persistedState.create;
-  VAR tim:T_timeIntegrationMethod;
-      steps,order:longint;
   begin
     if not(loadFromFile(ChangeFileExt(paramStr(0),'.cfg'))) then begin
       setLength(snapshots,0);
     end;
-    calibration_open:=false;
+    {$ifdef enable_calibration} calibration_open:=false; {$endif}
   end;
 
 DESTRUCTOR T_persistedState.destroy;
   begin
-    if calibration_open then close(calibration_handle);
+    {$ifdef enable_calibration} if calibration_open then close(calibration_handle); {$endif}
     saveToFile(ChangeFileExt(paramStr(0),'.cfg'));
   end;
 
@@ -233,8 +235,7 @@ FUNCTION T_persistedState.getSerialVersion: dword;
     result:=0;
   end;
 
-FUNCTION T_persistedState.loadFromStream(
-  VAR stream: T_bufferedInputStreamWrapper): boolean;
+FUNCTION T_persistedState.loadFromStream(VAR stream: T_bufferedInputStreamWrapper): boolean;
   VAR snapshotCount,i:longint;
   begin
     if not(inherited) then exit(false);
@@ -503,13 +504,24 @@ PROCEDURE T_userInteraction.setTimeIntegrationMethod(CONST mehod: T_timeIntegrat
     {$endif}
   end;
 
-PROCEDURE T_userInteraction.setSpatialDiscretization(
-  CONST spatial_discretization: T_spatial_discretization);
+PROCEDURE T_userInteraction.setSpatialDiscretization(CONST spatial_discretization: T_spatial_discretization);
   begin
     {$ifdef multithreading}
     enterCriticalSection(usercs);
     {$endif}
     spatialDiscretization:=spatial_discretization;
+    settingChanged:=true;
+    {$ifdef multithreading}
+    leaveCriticalSection(usercs);
+    {$endif}
+  end;
+
+PROCEDURE T_userInteraction.setErrorTolerance(CONST newTol:TmyFloat);
+  begin
+    {$ifdef multithreading}
+    enterCriticalSection(usercs);
+    {$endif}
+    errorTolerance:=newTol;
     settingChanged:=true;
     {$ifdef multithreading}
     leaveCriticalSection(usercs);
@@ -808,7 +820,7 @@ FUNCTION D_limited3rdOrderUpwind(CONST s:T_State):T_State;
       dFood,dFire: TmyFloat;
 
   PROCEDURE calculateFlow(CONST food_1,food0,food1,food2:TmyFloat; OUT foodFlow:TmyFloat;
-                          CONST fire_1,fire0,fire1,fire2:TmyFloat; OUT fireFlow:TmyFloat);  {$ifndef debugMode} inline; {$endif}
+                          CONST fire_1,fire0,fire1,fire2:TmyFloat; OUT fireFlow:TmyFloat);  //{$ifndef debugMode} inline; {$endif}
     VAR slopeRatio:TmyFloat;
     {$MACRO ON}
     {$define x0:=fire_1}
@@ -941,12 +953,13 @@ FUNCTION fifthOrderStepForward(CONST initialState:T_State; CONST D:T_derivativeF
     F4:=D(result);        result:=xpymz(initialState,F0,-1.694135567449278 *dt); pymz(result,F1, 4.041995759072443 *dt); pymz(result,F2,-1.808087874978392 *dt); pymz(result,F3,0.42246268620353628*dt); pymz(result,F4,0.03776499715168942 *dt);
   end;
 
+{$ifdef enable_calibration}
 FUNCTION trueErrorEstimation(CONST initialState, approximation:T_State; CONST D:T_derivativeFunction; CONST dt:TmyFloat):TmyFloat;
   VAR preciseEstimation:T_State;
       j,i:longint;
   begin
-    preciseEstimation:=fifthOrderStepForward(initialState     ,d,dt/2);
-    preciseEstimation:=fifthOrderStepForward(preciseEstimation,d,dt/2);
+    preciseEstimation:=fifthOrderStepForward(initialState     ,D,dt/2);
+    preciseEstimation:=fifthOrderStepForward(preciseEstimation,D,dt/2);
     result:=1E-10;
     for j:=0 to SYS_HEIGHT-1 do
     for i:=0 to SYS_WIDTH -1 do
@@ -961,10 +974,12 @@ PROCEDURE T_persistedState.addCalibrationData(
     CONST dt, estimatedError: TmyFloat);
 
   VAR actualError:TmyFloat;
+      calibrationFileName: String;
   begin
     if not(calibration_open) then begin
-      assign(calibration_handle,'burn_calibration.txt');
-      if fileExists('burn_calibration.txt')
+      calibrationFileName:=ChangeFileExt(paramstr(0),'_calibration.txt');
+      assign(calibration_handle,calibrationFileName);
+      if fileExists(calibrationFileName)
       then append(calibration_handle)
       else rewrite(calibration_handle);
       calibration_open:=true;
@@ -974,6 +989,7 @@ PROCEDURE T_persistedState.addCalibrationData(
     then writeln(calibration_handle, method,'(',steps,',',order,');',estimatedError,';',actualError)
     else writeln(calibration_handle, method,                     ';',estimatedError,';',actualError);
   end;
+{$endif}
 
 VAR F0,F1,F2,F3,F4,F5,approx1,approx2:T_State;
     f0_isReusable:boolean=false;
@@ -1020,61 +1036,23 @@ PROCEDURE T_cellSystem.doMacroTimeStep(VAR user: T_userInteraction);
       end;
       {$endif}
       if user.settingChanged then begin
+        if timeIntegrationMethod<>user.timeIntegrationMethod
+        then multistep_reusable:=0;
+        multistep_order:=user.multistep_order;
+        multistep_steps:=user.multistep_steps;
+        timeIntegrationMethod:=user.timeIntegrationMethod;
+        tol:=user.errorTolerance;
         equationParameters:=user.equation_parameters ;
         f0_isReusable:=false;
-        user.settingChanged:=false;
         recommendedStepSize:=TIME_STEP_SIZE*1E-3;
-        prevDt[0]:=TIME_STEP_SIZE*1E-3;
-        prevDt[1]:=TIME_STEP_SIZE*1E-3;
-        prevDt[2]:=TIME_STEP_SIZE*1E-3;
-        prevDt[3]:=TIME_STEP_SIZE*1E-3;
-        prevDt[4]:=TIME_STEP_SIZE*1E-3;
-        prevDt[5]:=TIME_STEP_SIZE*1E-3;
+
         case user.spatialDiscretization of
           FIRST_ORDER_UPWIND        : D:=@D_1stOrderUpwind;
           SECOND_ORDER_CENTRAL      : D:=@D_2ndOrderCentral;
           THIRD_ORDER_UPWIND        : D:=@D_3rdOrderUpwind;
           LIMITED_THIRD_ORDER_UPWIND: D:=@D_limited3rdOrderUpwind;
         end;
-        multistep_reusable:=0;
-      end;
-      if user.timeIntegrationMethod<>timeIntegrationMethod then multistep_reusable:=0;
-
-      multistep_order:=user.multistep_order;
-      multistep_steps:=user.multistep_steps;
-      timeIntegrationMethod:=user.timeIntegrationMethod;
-      tol:=user.errorTolerance;
-      case timeIntegrationMethod of
-        BOGACKI_SHAMPINE: tol*=0.54759996176737147 ;
-        BSB_SSP_3       : tol*=3.9764546092651285  ;
-        BSB_SSP_4       : tol*=0.8989759102239988  ;
-        CASH_CARP       : tol*=0.039818197046009106;
-        HEUN_EULER      : tol*=0.5010575893711575  ;
-        MULTISTEP: case multistep_steps of
-          2: tol*=17.680001354061346 ;
-          3: case multistep_order of
-               2: tol*=2.162805015679522 ;
-               3: tol*=4.6298233572299576;
-             end;
-          4: case multistep_order of
-               2: tol*=2.4289562377920766;
-               3: tol*=1.1510304081800895;
-               4: tol*=0.7124133305136042;
-             end;
-          5: case multistep_order of
-               2: tol*=34.58401076132032   ;
-               3: tol*= 2.0501943130158407 ;
-               4: tol*= 0.18867477753007145;
-               5: tol*= 0.21070110095469605;
-             end;
-          6: case multistep_order of
-               2: tol*=6.572067424490469   ;
-               3: tol*=0.9730322971217788  ;
-               4: tol*=0.3040881174397459  ;
-               5: tol*=0.086977386356526978;
-               6: tol*=0.09895155877003528 ;
-             end;
-        end;
+        user.settingChanged:=false;
       end;
       {$ifdef multithreading}
       leaveCriticalSection(user.usercs);
@@ -1087,8 +1065,12 @@ PROCEDURE T_cellSystem.doMacroTimeStep(VAR user: T_userInteraction);
       delta,maxDelta: TmyFloat;
       timeOutAtTicks: qword;
       statistics:T_statistics;
-//      calibrating:boolean;
-  PROCEDURE doMultistep(steps,order:longint); {$ifndef debugMode} inline; {$endif}
+
+      {$ifdef enable_calibration}
+      calibrating:boolean=false;
+      {$endif}
+
+  PROCEDURE doMultistep(CONST steps,order:longint);
     TYPE T_Coeff=array[0..5,0..5] of TmyFloat;
     FUNCTION prepareCoeff(CONST t1,t2,t3,t4,t5:TmyFloat; CONST effSt:longint):T_Coeff;
       VAR i,j,k:longint;
@@ -1146,12 +1128,6 @@ PROCEDURE T_cellSystem.doMacroTimeStep(VAR user: T_userInteraction);
         i,j:longint;
         dtRel:TmyFloat;
     begin
-      if multistep_reusable<2 then begin
-        F1:=D(state); state:=fifthOrderStepForward(state,D,prevDt[1]); dtRest-=prevDt[1];
-        F0:=D(state); state:=fifthOrderStepForward(state,D,prevDt[0]); dt    :=prevDt[0];
-        multistep_reusable:=2;
-        exit;
-      end;
       F5:=F4; prevDt[5]:=prevDt[4];
       F4:=F3; prevDt[4]:=prevDt[3];
       F3:=F2; prevDt[3]:=prevDt[2];
@@ -1160,8 +1136,11 @@ PROCEDURE T_cellSystem.doMacroTimeStep(VAR user: T_userInteraction);
       F0:=D(state);
       inc(multistep_reusable); if multistep_reusable>5 then multistep_reusable:=6;
 
-      if multistep_reusable<steps then steps:=multistep_reusable;
-      if steps<order then order:=steps;
+      if multistep_reusable<steps then begin
+        prevDt[0]:=TIME_STEP_SIZE*1E-3;
+        state:=fifthOrderStepForward(state,D,prevDt[0]); dt    :=prevDt[0];
+        exit;
+      end;
       C:=prepareCoeff((-prevDt[1]                                        )/prevDt[1],
                       (-prevDt[1]-prevDt[2]                              )/prevDt[1],
                       (-prevDt[1]-prevDt[2]-prevDt[3]                    )/prevDt[1],
@@ -1177,14 +1156,14 @@ PROCEDURE T_cellSystem.doMacroTimeStep(VAR user: T_userInteraction);
       end;
 
       //Extract highest order term for a priori error estimation:
-      approx1:=                      (c_[order-1,0])*F0;
-                      pymz(approx1,F1,c_[order-1,1]);
-      if steps>2 then pymz(approx1,F2,c_[order-1,2]);
-      if steps>3 then pymz(approx1,F3,c_[order-1,3]);
-      if steps>4 then pymz(approx1,F4,c_[order-1,4]);
-      if steps>5 then pymz(approx1,F5,c_[order-1,5]);
+      approx1:=                            (c_[order-1,0])*F0;
+                            pymz(approx1,F1,c_[order-1,1]);
+      if steps>2 then begin pymz(approx1,F2,c_[order-1,2]);
+      if steps>3 then begin pymz(approx1,F3,c_[order-1,3]);
+      if steps>4 then begin pymz(approx1,F4,c_[order-1,4]);
+      if steps>5 then       pymz(approx1,F5,c_[order-1,5]); end; end; end;
 
-      maxDelta:=1E-8;
+      maxDelta:=1E-10;
       for j:=0 to SYS_HEIGHT-1 do for i:=0 to SYS_WIDTH-1 do with approx1[j,i] do begin
         delta:=abs(food); if delta>maxDelta then maxDelta:=delta;
         delta:=abs(fire); if delta>maxDelta then maxDelta:=delta;
@@ -1204,15 +1183,19 @@ PROCEDURE T_cellSystem.doMacroTimeStep(VAR user: T_userInteraction);
         dt:=0;
         exit;
       end;
-      //if calibrating then approx2:=state;
-                      pymz(state,F0,(C[0,0] + (C[1,0] + (C[2,0] + (C[3,0] + (C[4,0] + C[5,0]*dtRel)*dtRel)*dtRel)*dtRel)*dtRel)*dt);
-                      pymz(state,F1,(C[0,1] + (C[1,1] + (C[2,1] + (C[3,1] + (C[4,1] + C[5,1]*dtRel)*dtRel)*dtRel)*dtRel)*dtRel)*dt);
-      if steps>2 then pymz(state,F2,(C[0,2] + (C[1,2] + (C[2,2] + (C[3,2] + (C[4,2] + C[5,2]*dtRel)*dtRel)*dtRel)*dtRel)*dtRel)*dt);
-      if steps>3 then pymz(state,F3,(C[0,3] + (C[1,3] + (C[2,3] + (C[3,3] + (C[4,3] + C[5,3]*dtRel)*dtRel)*dtRel)*dtRel)*dtRel)*dt);
-      if steps>4 then pymz(state,F4,(C[0,4] + (C[1,4] + (C[2,4] + (C[3,4] + (C[4,4] + C[5,4]*dtRel)*dtRel)*dtRel)*dtRel)*dtRel)*dt);
-      if steps>5 then pymz(state,F5,(C[0,5] + (C[1,5] + (C[2,5] + (C[3,5] + (C[4,5] + C[5,5]*dtRel)*dtRel)*dtRel)*dtRel)*dtRel)*dt);
+      {$ifdef enable_calibration}
+      if calibrating then approx2:=state;
+      {$endif}
+                            pymz(state,F0,(C[0,0] + (C[1,0] + (C[2,0] + (C[3,0] + (C[4,0] + C[5,0]*dtRel)*dtRel)*dtRel)*dtRel)*dtRel)*dt);
+                            pymz(state,F1,(C[0,1] + (C[1,1] + (C[2,1] + (C[3,1] + (C[4,1] + C[5,1]*dtRel)*dtRel)*dtRel)*dtRel)*dtRel)*dt);
+      if steps>2 then begin pymz(state,F2,(C[0,2] + (C[1,2] + (C[2,2] + (C[3,2] + (C[4,2] + C[5,2]*dtRel)*dtRel)*dtRel)*dtRel)*dtRel)*dt);
+      if steps>3 then begin pymz(state,F3,(C[0,3] + (C[1,3] + (C[2,3] + (C[3,3] + (C[4,3] + C[5,3]*dtRel)*dtRel)*dtRel)*dtRel)*dtRel)*dt);
+      if steps>4 then begin pymz(state,F4,(C[0,4] + (C[1,4] + (C[2,4] + (C[3,4] + (C[4,4] + C[5,4]*dtRel)*dtRel)*dtRel)*dtRel)*dtRel)*dt);
+      if steps>5 then       pymz(state,F5,(C[0,5] + (C[1,5] + (C[2,5] + (C[3,5] + (C[4,5] + C[5,5]*dtRel)*dtRel)*dtRel)*dtRel)*dtRel)*dt); end; end; end;
       prevDt[0]:=dt;
-      //if calibrating then persistedState.addCalibrationData(MULTISTEP,steps,order,approx2,state,D,dt,tol*power(dt/recommendedStepSize,order));
+      {$ifdef enable_calibration}
+      if calibrating then persistedState.addCalibrationData(MULTISTEP,steps,order,approx2,state,D,dt,tol*power(dt/recommendedStepSize,order));
+      {$endif}
     end;
 
   begin
@@ -1222,11 +1205,14 @@ PROCEDURE T_cellSystem.doMacroTimeStep(VAR user: T_userInteraction);
     kSub:=0;
 
     while (dtRest>0) and (user.recording or not((kSub>0) and (GetTickCount64>timeOutAtTicks))) do begin
-      //calibrating:=random<0.01;
-      //for j:=0 to SYS_HEIGHT-1 do for i:=0 to SYS_WIDTH-1 do with state[j,i] do begin
-      //  if food<0 then food:=0;
-      //  if fire<0 then fire:=0;
-      //end;
+      for j:=0 to SYS_HEIGHT-1 do for i:=0 to SYS_WIDTH-1 do with state[j,i] do begin
+        if fire<0 then fire:=0;
+        if food<0 then food:=0;
+      end;
+      {$ifdef enable_calibration}
+      calibrating:=random<0.01; //about every 100th micro-step will be used for collecting calibration data
+      {$endif}
+
       dt:=dtRest/ceil(dtRest/recommendedStepSize);
       case timeIntegrationMethod of
         MULTISTEP  : doMultistep(multistep_steps,multistep_order);
@@ -1299,15 +1285,17 @@ PROCEDURE T_cellSystem.doMacroTimeStep(VAR user: T_userInteraction);
         dtRest-=dt;
         inc(kSub);
         {$ifdef multithreading}
-        if user.settingChanged then updateByUser;
+        if user.settingChanged or (user.snapshotState<>ss_none) then updateByUser;
         {$endif}
       end else begin
-        maxDelta:=1E-6;
+        maxDelta:=1E-10;
         for j:=0 to SYS_HEIGHT-1 do for i:=0 to SYS_WIDTH-1 do with approx2[j,i] do begin
           delta:=abs(approx1[j,i].food-food); if delta>maxDelta then maxDelta:=delta;
           delta:=abs(approx1[j,i].fire-fire); if delta>maxDelta then maxDelta:=delta;
         end;
-        //if calibrating then persistedState.addCalibrationData(timeIntegrationMethod,0,0,state,approx2,D,dt,maxDelta);
+        {$ifdef enable_calibration}
+        if calibrating then persistedState.addCalibrationData(timeIntegrationMethod,0,0,state,approx2,D,dt,maxDelta);
+        {$endif}
         case timeIntegrationMethod of
           BOGACKI_SHAMPINE,
           BSB_SSP_3 : recommendedStepSize:=dt*power(tol/maxDelta,1/3);
@@ -1327,7 +1315,7 @@ PROCEDURE T_cellSystem.doMacroTimeStep(VAR user: T_userInteraction);
           end;
         end else begin
           {$ifdef multithreading}
-          if user.settingChanged then updateByUser;
+          if user.settingChanged or (user.snapshotState<>ss_none) then updateByUser;
           {$endif}
           {$ifdef debugMode}
           writeln('Step: ',timeStepIndex,'/',kSub,' dt=',dt:0:5,' dt''=',recommendedStepSize:0:5,' -- rejected ');
@@ -1346,12 +1334,10 @@ PROCEDURE T_cellSystem.doMacroTimeStep(VAR user: T_userInteraction);
     statistics.maxFire:=0;
     statistics.maxFood:=0;
     for j:=0 to SYS_HEIGHT-1 do for i:=0 to SYS_WIDTH-1 do with state[j,i] do begin
-      if food<0 then food:=0;
       if food<statistics.minFood then statistics.minFood:=food;
       if food>statistics.maxFood then statistics.maxFood:=food;
       statistics.avgFood+=food;
 
-      if fire<0 then fire:=0;
       if fire<statistics.minFire then statistics.minFire:=fire;
       if fire>statistics.maxFire then statistics.maxFire:=fire;
       statistics.avgFire+=fire;

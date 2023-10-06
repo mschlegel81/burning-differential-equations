@@ -17,6 +17,12 @@
       </XPManifest>
       <Icon Value="0"/>
     </General>
+    <VersionInfo>
+      <UseVersionInfo Value="True"/>
+      <RevisionNr Value="1"/>
+      <Attributes pvaPreRelease="True"/>
+      <StringTable Comments="Burn - A PDE playground" CompanyName="Martin Schlegel" FileDescription="Simple executable" InternalName="Burn" LegalCopyright="Copyleft" OriginalFilename="burn.exe"/>
+    </VersionInfo>
     <BuildModes Count="3">
       <Item1 Name="Default" Default="True"/>
       <Item2 Name="debug">
@@ -180,5 +186,9 @@
         </Win32>
       </Options>
     </Linking>
+    <Other>
+      <CustomOptions Value="-dmultithreading
+-denable_calibration"/>
+    </Other>
   </CompilerOptions>
 </CONFIG>

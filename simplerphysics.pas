@@ -1367,12 +1367,14 @@ PROCEDURE T_cellSystem.getPicture(VAR rgbPicture:T_rgbPicture);
   VAR r,b:TmyFloat;
   VAR i,j:longint;
   begin
+    EnterCriticalSection(rgbPicture.cs);
     for j:=0 to SYS_HEIGHT-1 do for i:=0 to SYS_WIDTH-1 do begin
       r:=state[j,i].fire/WHITE_LEVEL;
       b:=state[j,i].food/WHITE_LEVEL;
       rgbPicture.setValue(i,j,r,b);
     end;
     rgbPicture.invalidateBitmap;
+    LeaveCriticalSection(rgbPicture.cs);
   end;
 
 INITIALIZATION

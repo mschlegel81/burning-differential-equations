@@ -175,6 +175,7 @@ VAR
   BurnForm: TBurnForm;
 
 IMPLEMENTATION
+USES Math;
 VAR smoothScale:boolean=false;
 VAR {$ifdef multithreading}
     queue,
@@ -591,7 +592,7 @@ PROCEDURE TBurnForm.ErrorToleranceTrackBarChange(Sender: TObject);
   begin
     newTol:=exp(ln(10)*ErrorToleranceTrackBar.position/10);
     errorToleranceLabel.caption:='Error tolerance: '+floatToStrF(newTol,ffExponent,4,4);
-    user.errorTolerance:=newTol;
+    user.setErrorTolerance(newTol);
     lastUserInput:=GetTickCount64;
   end;
 
@@ -735,6 +736,13 @@ PROCEDURE TBurnForm.FoodMovementTrackBarChange(Sender: TObject);
 PROCEDURE TBurnForm.FormCloseQuery(Sender: TObject; VAR CanClose: boolean);
   begin
     {$ifdef multithreading}
+    if recorder<>nil then begin
+      dispose(recorder,destroy);
+      recording:=false;
+      user.recording:=false;
+      recorder:=nil;
+    end;
+
     Timer1.interval:=1;
     closeQueried:=true;
     CanClose:=not(threadRunning);
@@ -868,7 +876,7 @@ PROCEDURE TBurnForm.IdleTimer1Timer(Sender: TObject);
       // queryInterval/k =  1/(k*frameGenerationRate + framesCached-[ahead target])
       ahead_target:=frameGenerationRate/500;
       newInterval:=1000/(1E-3+1000*frameGenerationRate+(framesCached-ahead_target));
-      if   newInterval< 1
+      if   (newInterval< 1) or isNan(newInterval) or (isInfinite(newInterval))
       then newInterval:=1 else
       if   newInterval> 1000
       then newInterval:=1000;

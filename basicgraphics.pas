@@ -27,6 +27,7 @@ TYPE
       Pixels:T_frameData;
       Bitmap:TBGRABitmap;
     public
+      cs:TRTLCriticalSection;
       CONSTRUCTOR create();
       DESTRUCTOR destroy;
 
@@ -289,11 +290,15 @@ CONSTRUCTOR T_rgbPicture.create;
   begin
     followedBy:=nil;
     Bitmap:=nil;
+    InitCriticalSection(cs);
   end;
 
 DESTRUCTOR T_rgbPicture.destroy;
   begin
+    EnterCriticalSection(cs);
     if Bitmap<>nil then FreeAndNil(Bitmap);
+    LeaveCriticalSection(cs);
+    DoneCriticalSection(cs);
   end;
 
 PROCEDURE halfTransform1(CONST c:T_rgbColor; OUT trueRed,trueBlue:word); inline;
@@ -462,7 +467,11 @@ FUNCTION T_rgbPicture.ensureBitmap(CONST resized:boolean=false):boolean;
 
   VAR x,y:longint;
   begin
-    if Bitmap<>nil then exit(false);
+    EnterCriticalSection(cs);
+    if Bitmap<>nil then begin
+      LeaveCriticalSection(cs);
+      exit(false);
+    end;
     if resized then begin
       Bitmap:=TBGRABitmap.create(SYS_WIDTH*3,SYS_HEIGHT*3);
       for y:=0 to SYS_HEIGHT-1 do begin
@@ -482,12 +491,15 @@ FUNCTION T_rgbPicture.ensureBitmap(CONST resized:boolean=false):boolean;
         for x:=0 to SYS_WIDTH-1 do line[0][x]:=transformColor(Pixels[y,x]);
       end;
     end;
+    LeaveCriticalSection(cs);
     result:=true;
   end;
 
 PROCEDURE T_rgbPicture.invalidateBitmap;
   begin
+    EnterCriticalSection(cs);
     if Bitmap<>nil then FreeAndNil(Bitmap);
+    LeaveCriticalSection(cs);
   end;
 
 PROCEDURE T_rgbPicture.copyToImage(VAR destImage: TImage);

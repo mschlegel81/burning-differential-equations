@@ -449,24 +449,12 @@ PROCEDURE T_userInteraction.affirmLastPoint;
 
 PROCEDURE T_userInteraction.logStatistics(CONST stats: T_statistics);
   begin
-    {$ifdef multithreading}
-    enterCriticalSection(usercs);
-    {$endif}
     currentStats:=stats;
-    {$ifdef multithreading}
-    leaveCriticalSection(usercs);
-    {$endif}
   end;
 
 FUNCTION T_userInteraction.getStatistics: T_statistics;
   begin
-    {$ifdef multithreading}
-    enterCriticalSection(usercs);
-    {$endif}
     result:=currentStats;
-    {$ifdef multithreading}
-    leaveCriticalSection(usercs);
-    {$endif}
   end;
 
 PROCEDURE T_userInteraction.stop;

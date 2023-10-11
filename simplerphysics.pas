@@ -974,10 +974,10 @@ PROCEDURE T_persistedState.addCalibrationData(
     CONST dt, estimatedError: TmyFloat);
 
   VAR actualError:TmyFloat;
-      calibrationFileName: String;
+      calibrationFileName: string;
   begin
     if not(calibration_open) then begin
-      calibrationFileName:=ChangeFileExt(paramstr(0),'_calibration.txt');
+      calibrationFileName:=ChangeFileExt(paramStr(0),'_calibration.txt');
       assign(calibration_handle,calibrationFileName);
       if fileExists(calibrationFileName)
       then append(calibration_handle)
@@ -1070,9 +1070,9 @@ PROCEDURE T_cellSystem.doMacroTimeStep(VAR user: T_userInteraction);
       calibrating:boolean=false;
       {$endif}
 
-  PROCEDURE doMultistep(CONST steps,order:longint);
+  PROCEDURE doMultistep(CONST steps,order:byte);
     TYPE T_Coeff=array[0..5,0..5] of TmyFloat;
-    FUNCTION prepareCoeff(CONST t1,t2,t3,t4,t5:TmyFloat; CONST effSt:longint):T_Coeff;
+    FUNCTION prepareCoeff(CONST t1,t2,t3,t4,t5:TmyFloat):T_Coeff;
       VAR i,j,k:longint;
           M:T_Coeff;
           fak:TmyFloat;
@@ -1081,10 +1081,10 @@ PROCEDURE T_cellSystem.doMacroTimeStep(VAR user: T_userInteraction);
       begin
                         t_pow[0,1]:=0;
                         t_pow[1,1]:=t1;
-        if effSt>2 then t_pow[2,1]:=t2 else t_pow[2,1]:=0;
-        if effSt>3 then t_pow[3,1]:=t3 else t_pow[3,1]:=0;
-        if effSt>4 then t_pow[4,1]:=t4 else t_pow[4,1]:=0;
-        if effSt>5 then t_pow[5,1]:=t5 else t_pow[5,1]:=0;
+        if steps>2 then t_pow[2,1]:=t2 else t_pow[2,1]:=0;
+        if steps>3 then t_pow[3,1]:=t3 else t_pow[3,1]:=0;
+        if steps>4 then t_pow[4,1]:=t4 else t_pow[4,1]:=0;
+        if steps>5 then t_pow[5,1]:=t5 else t_pow[5,1]:=0;
         for j:=1 to 10 do s_pow[j]:=0;
         for i:=1 to 5 do begin
           t_pow[i,0]:=1;
@@ -1106,8 +1106,8 @@ PROCEDURE T_cellSystem.doMacroTimeStep(VAR user: T_userInteraction);
         result[0,0]:=1; for j:=1 to 5 do result[0,j]:=0;
         for i:=1 to order-1 do begin
           result[i,0]:=0;
-          for j:=1 to effSt-1 do result[i,j]:=t_pow[j,i];
-          for j:=effSt   to 5 do result[i,j]:=0;
+          for j:=1 to steps-1 do result[i,j]:=t_pow[j,i];
+          for j:=steps   to 5 do result[i,j]:=0;
         end;
         for i:=order to 5 do for j:=0 to 5 do result[i,j]:=0;
 
@@ -1116,17 +1116,18 @@ PROCEDURE T_cellSystem.doMacroTimeStep(VAR user: T_userInteraction);
           fak:=1/M[k,k];
           M[k,k]:=1;
           for j:=k+1 to order-1 do M     [k,j]*=fak;
-          for j:=0   to effSt-1 do result[k,j]*=fak;
+          for j:=0   to steps-1 do result[k,j]*=fak;
           for i:=0 to order-1 do if (i<>k) and (M[i,k]<>0) then begin
             fak:=-M[i,k];
             for j:=0 to order-1 do M     [i,j]+=fak*M     [k,j];
-            for j:=0 to effSt-1 do result[i,j]+=fak*result[k,j];
+            for j:=0 to steps-1 do result[i,j]+=fak*result[k,j];
           end;
         end;
       end;
-    VAR C,c_: T_Coeff;
+    VAR C: T_Coeff;
         i,j:longint;
         dtRel:TmyFloat;
+        maxOscillation:TmyFloat=0;
     begin
       F5:=F4; prevDt[5]:=prevDt[4];
       F4:=F3; prevDt[4]:=prevDt[3];
@@ -1145,34 +1146,32 @@ PROCEDURE T_cellSystem.doMacroTimeStep(VAR user: T_userInteraction);
                       (-prevDt[1]-prevDt[2]                              )/prevDt[1],
                       (-prevDt[1]-prevDt[2]-prevDt[3]                    )/prevDt[1],
                       (-prevDt[1]-prevDt[2]-prevDt[3]-prevDt[4]          )/prevDt[1],
-                      (-prevDt[1]-prevDt[2]-prevDt[3]-prevDt[4]-prevDt[5])/prevDt[1],steps);
-      if steps=order then c_:=C else begin
-        c_:=prepareCoeff((-prevDt[1]                                        )/prevDt[1],
-                         (-prevDt[1]-prevDt[2]                              )/prevDt[1],
-                         (-prevDt[1]-prevDt[2]-prevDt[3]                    )/prevDt[1],
-                         (-prevDt[1]-prevDt[2]-prevDt[3]-prevDt[4]          )/prevDt[1],
-                         (-prevDt[1]-prevDt[2]-prevDt[3]-prevDt[4]-prevDt[5])/prevDt[1],steps-1);
-        for j:=0 to 5 do c_[order-1,j]-=C[order-1,j];
-      end;
-
+                      (-prevDt[1]-prevDt[2]-prevDt[3]-prevDt[4]-prevDt[5])/prevDt[1]);
       //Extract highest order term for a priori error estimation:
-      approx1:=                            (c_[order-1,0])*F0;
-                            pymz(approx1,F1,c_[order-1,1]);
-      if steps>2 then begin pymz(approx1,F2,c_[order-1,2]);
-      if steps>3 then begin pymz(approx1,F3,c_[order-1,3]);
-      if steps>4 then begin pymz(approx1,F4,c_[order-1,4]);
-      if steps>5 then       pymz(approx1,F5,c_[order-1,5]); end; end; end;
+      approx1:=                            (C[order-1,0])*F0;
+                            pymz(approx1,F1,C[order-1,1]);
+      if steps>2 then begin pymz(approx1,F2,C[order-1,2]);
+      if steps>3 then begin pymz(approx1,F3,C[order-1,3]);
+      if steps>4 then begin pymz(approx1,F4,C[order-1,4]);
+      if steps>5 then       pymz(approx1,F5,C[order-1,5]); end; end; end;
 
       maxDelta:=1E-10;
       for j:=0 to SYS_HEIGHT-1 do for i:=0 to SYS_WIDTH-1 do with approx1[j,i] do begin
-        delta:=abs(food); if delta>maxDelta then maxDelta:=delta;
-        delta:=abs(fire); if delta>maxDelta then maxDelta:=delta;
+        maxDelta:=max(maxDelta,max(abs(food),abs(fire)));
       end;
-      recommendedStepSize:=max(TIME_STEP_SIZE*1E-4,prevDt[1]*power(tol/maxDelta,1/(order-1)));
+
+      //Add simple oscillation detection:
+      approx1:=       prevDt[1]*F0; pymz(approx1,F1,-prevDt[1]);
+      pymz(approx1,F2,prevDt[1]);   pymz(approx1,F3,-prevDt[1]);
+      pymz(approx1,F4,prevDt[1]);   pymz(approx1,F5,-prevDt[1]);
+      for j:=0 to SYS_HEIGHT-1 do for i:=0 to SYS_WIDTH-1 do with approx1[j,i] do maxOscillation:=max(maxOscillation,max(abs(food),abs(fire)));
+      maxOscillation*=0.25;
+
+      recommendedStepSize:=max(TIME_STEP_SIZE*1E-4,
+         prevDt[1]*min(power(tol/maxDelta      ,1/(order-1)),
+                             tol/maxOscillation ));
       dt:=dtRest/ceil(dtRest/recommendedStepSize);
       dtRel:=dt/prevDt[1];
-      //projected error: recommendedStepSize = prevDt[1]*power(tol/maxDelta,1/(order-1))
-      //          error: tol*(recommendedStepSize/dt)^order
 
       if (recommendedStepSize<TIME_STEP_SIZE*1E-4) or
          (recommendedStepSize<prevDt[1]*1E-2) and (prevDt[1]>TIME_STEP_SIZE*1E-3) or
@@ -1353,14 +1352,14 @@ PROCEDURE T_cellSystem.getPicture(VAR rgbPicture:T_rgbPicture);
   VAR r,b:TmyFloat;
   VAR i,j:longint;
   begin
-    EnterCriticalSection(rgbPicture.cs);
+    enterCriticalSection(rgbPicture.cs);
     for j:=0 to SYS_HEIGHT-1 do for i:=0 to SYS_WIDTH-1 do begin
       r:=state[j,i].fire/WHITE_LEVEL;
       b:=state[j,i].food/WHITE_LEVEL;
       rgbPicture.setValue(i,j,r,b);
     end;
     rgbPicture.invalidateBitmap;
-    LeaveCriticalSection(rgbPicture.cs);
+    leaveCriticalSection(rgbPicture.cs);
   end;
 
 INITIALIZATION

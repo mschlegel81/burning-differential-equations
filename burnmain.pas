@@ -175,7 +175,7 @@ VAR
   BurnForm: TBurnForm;
 
 IMPLEMENTATION
-USES Math;
+USES math;
 VAR smoothScale:boolean=false;
 VAR {$ifdef multithreading}
     queue,

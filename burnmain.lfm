@@ -877,7 +877,7 @@ object BurnForm: TBurnForm
               TabOrder = 0
               OnValidateEntry = SnapshotsStringGridValidateEntry
               ColWidths = (
-                232
+                215
               )
             end
             object snapshot_include_state_checkbox: TCheckBox

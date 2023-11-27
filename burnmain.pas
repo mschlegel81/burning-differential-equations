@@ -459,7 +459,7 @@ FUNCTION calcThread(p:pointer):ptrint;
       sys.doMacroTimeStep(user);                      //
       new(pic,create());                              //
       sys.getPicture(pic^);                           //
-      if (pendingPreparations>10) or (updateDelay>10) //
+      if (pendingPreparations>20)                     //
       then pic^.ensureBitmap(smoothScale)             //
       else interLockedIncrement(pendingPreparations); //
       preQueue.addFrame(pic);                         //
